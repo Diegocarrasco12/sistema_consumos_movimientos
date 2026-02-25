@@ -75,3 +75,4 @@ Funciona en un entorno local (por ejemplo **XAMPP** o **LAMP**) y utiliza la bas
 - Se agregó el campo **`saldo_kg`** para replicar el flujo real de registro de operadores.
 - **`consumo_kg` se calcula automáticamente** antes de guardar, evitando errores manuales.
 - La interfaz visual está diseñada para ser **simple, clara y moderna**, con estilo corporativo adaptable.
+# sistema_consumos_movimientos
