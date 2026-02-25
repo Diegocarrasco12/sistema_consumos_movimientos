@@ -267,8 +267,15 @@
                     <label>Consumo calculado</label>
                     <input type="hidden" id="consumo_unidades" name="consumo_unidades">
                 </div>
-
-
+                <!-- Comentario (NO obligatorio) -->
+                <div class="form-group">
+                    <label for="comentario">Comentario (opcional)</label>
+                    <textarea
+                        id="comentario"
+                        name="comentario"
+                        placeholder="Observación opcional"
+                        rows="3"></textarea>
+                </div>
                 <hr>
 
                 <!-- ===============================
@@ -285,7 +292,7 @@
                     💾 Guardar Registro
                 </button>
                 <div style="text-align:center;">
-                    <a href="api/list_altillo.php" class="btn-listado">
+                    <a href="list_altillo.php" class="btn-listado">
                         📋 Ver registros
                     </a>
                 </div>

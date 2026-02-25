@@ -3,9 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
   /* =====================================================
    * CONFIGURACIÓN BASE
    * ===================================================== */
-  const btn        = document.getElementById('btnScan');
-  const readerDiv  = document.getElementById('qr-reader');
-  const resultado  = document.getElementById('resultado');
+  const btn = document.getElementById('btnScan');
+  const readerDiv = document.getElementById('qr-reader');
+  const resultado = document.getElementById('resultado');
 
   if (!btn || !readerDiv || !resultado) {
     console.error('❌ Elementos base no encontrados en el DOM');
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const BASE_URL = './';
 
   let qrScanner = null;
-  let scanning  = false;
+  let scanning = false;
   let lastRawQR = '';
 
   /* =====================================================
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           await detenerEscaneo();
         },
-        () => {} // errores de frame ignorados
+        () => { } // errores de frame ignorados
       );
 
     } catch (err) {
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (qrScanner) {
       try {
         await qrScanner.stop();
-      } catch {}
+      } catch { }
       qrScanner.clear();
       qrScanner = null;
     }
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
    * FETCH SEGURO (ANTI HTML / 404 / WARNINGS PHP)
    * ===================================================== */
   async function fetchJsonSeguro(url, options = {}) {
-    const res  = await fetch(url, options);
+    const res = await fetch(url, options);
     const text = await res.text();
 
     try {
@@ -111,13 +111,13 @@ document.addEventListener('DOMContentLoaded', () => {
        * 1) PARSE QR
        * ================================ */
       const jParse = await fetchJsonSeguro(
-  BASE_URL + 'api/parse_qr_altillo.php',
-  {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ qr: raw })
-  }
-);
+        BASE_URL + 'api/parse_qr_altillo.php',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ qr: raw })
+        }
+      );
 
 
       if (!jParse.ok) {
@@ -136,9 +136,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (codigo) {
         const jCat = await fetchJsonSeguro(
-  BASE_URL + 'api/catalogo_lookup_altillo.php?codigo=' +
-  encodeURIComponent(codigo)
-);
+          BASE_URL + 'api/catalogo_lookup_altillo.php?codigo=' +
+          encodeURIComponent(codigo)
+        );
 
         if (jCat.ok && jCat.found) {
           descripcion = jCat.data.descripcion;
@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
        * 3) MOSTRAR RESUMEN
        * ================================ */
       resultado.textContent =
-`📦 RESUMEN ALTILLO
+        `📦 RESUMEN ALTILLO
 ========================
 Código Producto : ${codigo ?? '—'}
 Unidades Tarja  : ${cantidad ?? '—'}
@@ -185,9 +185,9 @@ ${descripcion}
   /* =====================================================
    * CÁLCULO SALDO → CONSUMO
    * ===================================================== */
-  const saldoInput   = document.getElementById('saldo_unidades');
+  const saldoInput = document.getElementById('saldo_unidades');
   const consumoInput = document.getElementById('consumo_unidades');
-  const tarjaInput   = document.getElementById('unidades_tarja');
+  const tarjaInput = document.getElementById('unidades_tarja');
 
   if (saldoInput && consumoInput && tarjaInput) {
 
@@ -195,12 +195,12 @@ ${descripcion}
 
       // Unidades tarja viene como "525,00"
       const tarja = parseFloat(
-  (tarjaInput.value || '0')
-    .replace(/\./g, '')
-    .replace(',', '.')
-);
+        (tarjaInput.value || '0')
+          .replace(/\./g, '')
+          .replace(',', '.')
+      );
 
-const saldo = parseFloat(saldoInput.value || '0');
+      const saldo = parseFloat(saldoInput.value || '0');
 
 
       if (isNaN(tarja) || isNaN(saldo)) {
@@ -229,6 +229,8 @@ const saldo = parseFloat(saldoInput.value || '0');
         // Datos del operador
         const operador = document.getElementById('operador')?.value?.trim() || '';
         const np = document.getElementById('np')?.value?.trim() || '';
+        // Comentario (opcional)
+        const comentario = document.getElementById('comentario')?.value?.trim() || '';
 
         // Saldo / consumo
         const saldo = document.getElementById('saldo_unidades')?.value || '';
@@ -250,6 +252,7 @@ const saldo = parseFloat(saldoInput.value || '0');
         const payload = new URLSearchParams({
           operador,
           np,
+          comentario,
           saldo_unidades: String(saldo),
           consumo_unidades: String(consumo),
           codigo,
@@ -273,9 +276,9 @@ const saldo = parseFloat(saldoInput.value || '0');
         }
 
         // Feedback rápido (después lo dejamos bonito)
-const feedback = document.getElementById('feedback');
+        const feedback = document.getElementById('feedback');
 
-feedback.innerHTML = `
+        feedback.innerHTML = `
   <div style="
     display:flex;
     align-items:center;
@@ -298,14 +301,15 @@ feedback.innerHTML = `
   </div>
 `;
 
-// Vibración corta en móvil (si existe)
-if (navigator.vibrate) {
-  navigator.vibrate(80);
-}
+        // Vibración corta en móvil (si existe)
+        if (navigator.vibrate) {
+          navigator.vibrate(80);
+        }
 
-// Limpia campos manuales para siguiente registro
-document.getElementById('np').value = '';
-document.getElementById('saldo_unidades').value = '';
+        // Limpia campos manuales para siguiente registro
+        document.getElementById('np').value = '';
+        document.getElementById('saldo_unidades').value = '';
+        document.getElementById('comentario').value = '';
 
 
 

@@ -1,0 +1,180 @@
+Array
+(
+    [bin_codigo] => BIN-CALLE1-907
+    [tipo] => ENTRADA
+    [documento] => 1234
+)
+
+Array
+(
+    [archivo] => Array
+        (
+            [name] => 17679640508043168487064478870481.jpg
+            [full_path] => 17679640508043168487064478870481.jpg
+            [type] => 
+            [tmp_name] => 
+            [error] => 3
+            [size] => 0
+        )
+
+)
+Array
+(
+    [bin_codigo] => BIN-CALLE1-907
+    [tipo] => ENTRADA
+    [documento] => 1234
+)
+
+Array
+(
+    [archivo] => Array
+        (
+            [name] => 17679640508043168487064478870481.jpg
+            [full_path] => 17679640508043168487064478870481.jpg
+            [type] => 
+            [tmp_name] => 
+            [error] => 3
+            [size] => 0
+        )
+
+)
+Array
+(
+    [bin_codigo] => BIN-CALLE1-907
+    [tipo] => ENTRADA
+    [documento] => 1234
+)
+
+Array
+(
+    [archivo] => Array
+        (
+            [name] => 17679640508043168487064478870481.jpg
+            [full_path] => 17679640508043168487064478870481.jpg
+            [type] => 
+            [tmp_name] => 
+            [error] => 3
+            [size] => 0
+        )
+
+)
+Array
+(
+    [bin_codigo] => BIN-CALLE1-907
+    [tipo] => ENTRADA
+    [documento] => 1234
+)
+
+Array
+(
+    [archivo] => Array
+        (
+            [name] => 17679641801023156639137097476565.jpg
+            [full_path] => 17679641801023156639137097476565.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\xampp\tmp\phpE4EB.tmp
+            [error] => 0
+            [size] => 4296937
+        )
+
+)
+Array
+(
+    [bin_codigo] => BIN-CALLE1-820
+    [tipo] => ENTRADA
+    [documento] => 12345
+)
+
+Array
+(
+    [archivo] => Array
+        (
+            [name] => 1767965279116593291327528814704.jpg
+            [full_path] => 1767965279116593291327528814704.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\xampp\tmp\phpAE9B.tmp
+            [error] => 0
+            [size] => 2959053
+        )
+
+)
+Array
+(
+    [bin_codigo] => BIN-CALLE1-820
+    [tipo] => ENTRADA
+    [documento] => 12345
+)
+
+Array
+(
+    [archivo] => Array
+        (
+            [name] => 1767965279116593291327528814704.jpg
+            [full_path] => 1767965279116593291327528814704.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\xampp\tmp\php5F93.tmp
+            [error] => 0
+            [size] => 2959053
+        )
+
+)
+Array
+(
+    [bin_codigo] => BIN-CALLE1-907
+    [tipo] => SALIDA
+    [documento] => 1234
+)
+
+Array
+(
+    [archivo] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+)
+Array
+(
+    [bin_codigo] => BIN-CALLE1-820
+    [tipo] => ENTRADA
+    [documento] => 1234
+)
+
+Array
+(
+    [archivo] => Array
+        (
+            [name] => 17679678081564574708351856764542.jpg
+            [full_path] => 17679678081564574708351856764542.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\xampp\tmp\php4AE4.tmp
+            [error] => 0
+            [size] => 114090
+        )
+
+)
+Array
+(
+    [bin_codigo] => BIN-CALLE4-968
+    [tipo] => ENTRADA
+    [documento] => 12345
+)
+
+Array
+(
+    [archivo] => Array
+        (
+            [name] => 17679678081564574708351856764542.jpg
+            [full_path] => 17679678081564574708351856764542.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\xampp\tmp\php459C.tmp
+            [error] => 0
+            [size] => 114090
+        )
+
+)

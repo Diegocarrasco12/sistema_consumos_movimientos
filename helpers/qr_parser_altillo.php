@@ -22,6 +22,14 @@ function parse_qr_altillo(string $raw): array
     $codigo    = $m[1];  // 2001011500260
     $qtyRaw    = $m[2];  // 37303
     $lote      = $m[3];  // 3143-1 (o 4681-15, etc.)
+
+    // ✅ EXCEPCIÓN SEGURA: si el QR trae lote con 3+ dígitos después del guion (ej: 1003-200),
+    // lo extraemos desde el RAW completo (porque el match original lo truncará).
+    if (preg_match('/,0*10?(\d{3,7}-\d{3,})(?:#|$)/', $raw, $lx)) {
+        $lote = $lx[1]; // queda 1003-200 (sin prefijos 0 ni 10)
+    }
+
+
     // Normalización de LOTE:
     // En los QR viene como 10XXXX-YY pero el lote real es XXXX-YY
     // Ej: 104681-15 -> 4681-15
