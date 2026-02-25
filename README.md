@@ -76,3 +76,4 @@ Funciona en un entorno local (por ejemplo **XAMPP** o **LAMP**) y utiliza la bas
 - **`consumo_kg` se calcula automáticamente** antes de guardar, evitando errores manuales.
 - La interfaz visual está diseñada para ser **simple, clara y moderna**, con estilo corporativo adaptable.
 # sistema_consumos_movimientos
+# sistema_consumos_movimientos
