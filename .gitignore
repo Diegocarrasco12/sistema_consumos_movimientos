@@ -118,6 +118,12 @@ docs/private/
 *.tar.gz
 
 ############################
+# DOCUMENTACIÓN (solo README público)
+############################
+docs/*
+!README.md
+
+############################
 # HISTORIAL LOCAL
 ############################
 .history/
