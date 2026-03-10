@@ -15,10 +15,9 @@ node_modules/
 ############################
 # CONFIGURACIÓN SENSIBLE
 ############################
-config/db.php
-config/db_bins.php
-config/db_sap.php
+config/
 .env
+.env.*
 
 ############################
 # ARCHIVOS GENERADOS
@@ -32,6 +31,13 @@ tmp/
 # DATA LOCAL
 ############################
 data/*.csv
+data/*.xlsx
+
+############################
+# EXPORTACIONES
+############################
+*.csv
+*.xlsx
 
 ############################
 # TEST / DEBUG
@@ -39,9 +45,11 @@ data/*.csv
 *.log
 *.sql
 test_*.php
+/public/test_*.php
 
 ############################
-# VERSIONES
+# VERSIONES / BACKUPS
 ############################
 *.bak
 *.old
+*.backup

@@ -1,31 +1,36 @@
 <?php
 
-/**
- * qr_parser.php
- *
- * Parser para QRs de tarjas enfocado en dejar "CÓDIGO" y "DESCRIPCIÓN"
- * para ingreso manual por el operador o, si es posible, decodificar el código
- * a partir del patrón numérico encontrado en el QR.
- *
- * Extrae automáticamente:
- *  - lote      (p.ej. 3821-15; acepta ceros a la izquierda en el QR)
- *  - tarja_kg  (p.ej. 1654,00; acepta "1.654,00", "1654,00", heurística desde bloque A)
- *  - docnum    (p.ej. 911000048; número de documento SAP después del #)
- *
- * Decodifica:
- *  - codigo    (a partir del bloque numérico inicial del QR)
- *
- * NUEVO:
- *  - Motor de lote inteligente que corrige casos como "000010108-04" → "108-04".
- *  - La lógica clásica sigue existiendo como fallback sin interferir.
- */
-
 declare(strict_types=1);
 
 namespace Helpers;
 
 /**
- * Normaliza un string de QR (limpia saltos y espacios repetidos).
+ * ===============================================================
+ * QR PARSER — VERSION INDUSTRIAL PARA SAP + ZEBRA
+ * ===============================================================
+ *
+ * OBJETIVO PRINCIPAL
+ *
+ * Extraer SOLO el dato confiable del QR:
+ *
+ *    LOTE
+ *
+ * Con ese lote el sistema consulta SAP:
+ *
+ *    SAPCatalog::findByBatchFlexible($lote)
+ *
+ * y SAP devuelve:
+ *
+ *    ItemCode
+ *    ItemName
+ *    Quantity
+ *
+ * ===============================================================
+ */
+
+
+/**
+ * Normaliza el string leído desde el QR
  */
 function _qr_normalize(string $raw): string
 {
@@ -34,27 +39,34 @@ function _qr_normalize(string $raw): string
     return trim($s);
 }
 
+
+
 /**
- * MOTOR NUEVO PARA DETECTAR LOTES
+ * ===============================================================
+ * DETECTOR INTELIGENTE DE LOTES
+ * ===============================================================
  *
- * Detecta lotes con ceros, basura o formateos extraños:
- *   000010108-04   → 108-04
- *   0000103546-61  → 3546-61
- *   00001095-09    → 95-09
+ * Detecta lotes aunque tengan basura o ceros:
  *
- * Este motor es PRIORITARIO. Solo si NO detecta lote, se ocupa el motor clásico.
+ * 000103551-20  → 3551-20
+ * 000010108-04  → 108-04
+ * 00001095-09   → 95-09
+ *
  */
 function detectar_lote_inteligente(string $s): ?string
 {
-    // Buscamos patrones del tipo: ,000010xxx-yy   o   000010xxx-yy#
+
     if (!preg_match('/0+1?0*(\d{2,6})-(\d{1,4})/', $s, $m)) {
         return null;
     }
 
-    $num = ltrim($m[1], '0');   // 0108 → 108
+    $num = ltrim($m[1], '0');
     $suf = $m[2];
 
-    // Casos como 1095-09 → 95-09
+    if ($num === '') {
+        $num = $m[1];
+    }
+
     if (preg_match('/^10(\d{2,})$/', $num, $mm)) {
         $num = $mm[1];
     }
@@ -63,180 +75,193 @@ function detectar_lote_inteligente(string $s): ?string
 }
 
 /**
- * Parser principal del QR.
+ * ===============================================================
+ * DETECTOR EXACTO DE PESO DESDE QR
+ * ===============================================================
+ *
+ * Casos detectados en tus ejemplos:
+ *
+ * 0211700029300130371188,000103389-3#911000021   -> 1188
+ * 021145003801010337850,0000104601-7#911000076   -> 850
+ * 020411100811812137000020001072450-1#9121394    -> 20
+ * 02040010010019573700012000107450-2#9121690     -> 120
+ * 020400100100045537000180001073540-4#9121572    -> 180
+ * 020454201304554137000005001074798-5#913692     -> 5
+ */
+function detectar_peso_inteligente(string $s): ?float
+{
+    $s = _qr_normalize($s);
+
+    if ($s === '') {
+        return null;
+    }
+
+    // Buscar el bloque completo del lote codificado al final
+    if (!preg_match('/0+1?0*\d{2,6}-\d{1,4}(?=#|$)/', $s, $m, PREG_OFFSET_CAPTURE)) {
+        return null;
+    }
+
+    $loteCodificado = $m[0][0] ?? '';
+    $posLote        = $m[0][1] ?? 0;
+
+    // Todo lo que está antes del lote
+    $antesDelLote = substr($s, 0, $posLote);
+    $antesDelLote = preg_replace('/\s+/', '', $antesDelLote ?? '');
+
+    if ($antesDelLote === '') {
+        return null;
+    }
+
+    // Buscar el último bloque que empieza con 37 y termina justo antes del lote
+    if (!preg_match('/37([0-9,]+)$/', $antesDelLote, $pesoMatch)) {
+        return null;
+    }
+
+    $rawPeso = $pesoMatch[1] ?? '';
+
+    if ($rawPeso === '') {
+        return null;
+    }
+
+    /**
+     * CASO A
+     * Viene con coma como separador antes del lote:
+     * 371188,
+     * 37850,
+     */
+    if (strpos($rawPeso, ',') !== false) {
+        [$parteEntera] = explode(',', $rawPeso, 2);
+
+        $digits = preg_replace('/\D+/', '', $parteEntera);
+
+        if ($digits === '') {
+            return null;
+        }
+
+        $digits = ltrim($digits, '0');
+        if ($digits === '') {
+            return 0.0;
+        }
+
+        return (float)$digits;
+    }
+
+    /**
+     * CASO B
+     * Viene sin coma, con 2 decimales implícitos:
+     * 00002000 -> 20
+     * 00012000 -> 120
+     * 00018000 -> 180
+     * 00000500 -> 5
+     */
+    $digits = preg_replace('/\D+/', '', $rawPeso);
+
+    if ($digits === '') {
+        return null;
+    }
+
+    $valor = ((float)$digits) / 100;
+
+    // Si queda entero, devolver entero en float limpio
+    if ((float)(int)$valor === $valor) {
+        return (float)(int)$valor;
+    }
+
+    return $valor;
+}
+
+
+
+/**
+ * ===============================================================
+ * PARSER PRINCIPAL
+ * ===============================================================
  */
 function parse_qr(string $raw): array
 {
+
     $s = _qr_normalize($raw);
 
     $out = [
-        'codigo'      => null,
-        'descripcion' => null,
         'lote'        => null,
-        'tarja_kg'    => null,
         'docnum'      => null,
+        'tarja_kg'    => null
     ];
 
     if ($s === '') {
         return $out;
     }
 
-    // ============================================================
-    // 1) DECODIFICAR CÓDIGO (ItemCode)
-    // ============================================================
 
-    if (strpos($s, ',') !== false) {
-        [$bloqueA] = explode(',', $s, 2);
-        $bloqueA = preg_replace('/\D+/', '', (string) $bloqueA);
 
-        if ($bloqueA !== '') {
-            $codigoDecodificado = decodificar_codigo_qr($bloqueA);
-            if ($codigoDecodificado !== '' && $codigoDecodificado !== null) {
-                $out['codigo'] = $codigoDecodificado;
+    /**
+     * ============================================================
+     * 1️⃣ DETECCION PRIORITARIA DE LOTE
+     * ============================================================
+     */
+
+    $loteNuevo = detectar_lote_inteligente($s);
+
+    if ($loteNuevo !== null) {
+        $out['lote'] = $loteNuevo;
+    } else {
+
+        /**
+         * ============================================================
+         * MOTOR CLASICO DE LOTE (FALLBACK)
+         * ============================================================
+         */
+
+        if (preg_match('/(?:^|[^\d])0*(\d{3,6}-\d{1,4})(?:[^\d]|$)/', $s, $m)) {
+
+            $lote = ltrim($m[1], '0');
+
+            [$num, $suf] = explode('-', $lote, 2);
+
+            if (preg_match('/^10(\d{2,})$/', $num, $mm)) {
+                $num = $mm[1];
             }
+
+            $out['lote'] = $num . '-' . $suf;
         }
     }
 
 
-    // ============================================================
-    // 2) LOTE — MOTOR NUEVO (PRIORITARIO)
-    //     (solo si NO fue resuelto por excepción)
-    // ============================================================
 
-    if ($out['lote'] === null) {
-
-        $loteNuevo = detectar_lote_inteligente($s);
-
-        if ($loteNuevo !== null) {
-            $out['lote'] = $loteNuevo;
-        } else {
-
-            // ============================================================
-            // MOTOR CLÁSICO (FALLBACK)
-            // ============================================================
-
-            if (preg_match('/(?:^|[^\d])0*(\d{3,6}-\d{1,4})(?:[^\d]|$)/', $s, $m)) {
-
-                $lote = ltrim($m[1], '0');
-                [$num, $suf] = explode('-', $lote, 2);
-
-                // Corrección 10xxx → xxx
-                if (preg_match('/^10(\d{2,})$/', $num, $mm)) {
-                    $num = $mm[1];
-                }
-
-                $out['lote'] = $num . '-' . $suf;
-            }
-        }
-    }
-
-
-    // ============================================================
-    // 3) TARJA_KG explícito
-    // ============================================================
-
-    if ($out['tarja_kg'] === null) {
-        if (preg_match('/\b([\d\.]{1,12},\d{2})\s*(?:kg)?\b/i', $s, $m)) {
-            $num = str_replace('.', '', $m[1]);
-            $num = str_replace(',', '.', $num);
-            $out['tarja_kg'] = (float) $num;
-        }
-    }
-
-    // ============================================================
-    // 4) TARJA_KG heurística (desde bloque A)
-    // ============================================================
-
-    if ($out['tarja_kg'] === null && strpos($s, ',') !== false) {
-        [$bloqueA] = explode(',', $s, 2);
-        $bloqueA = preg_replace('/\D+/', '', (string) $bloqueA);
-
-        if ($bloqueA !== '') {
-            $last4 = (int) substr($bloqueA, -4);
-            if ($last4 >= 100 && $last4 <= 5000) {
-                $out['tarja_kg'] = (float) $last4;
-            } else {
-                $last3 = (int) substr($bloqueA, -3);
-                if ($last3 >= 50 && $last3 <= 999) {
-                    $out['tarja_kg'] = (float) $last3;
-                }
-            }
-        }
-    }
-
-    // ============================================================
-    // 5) DOCNUM
-    // ============================================================
+    /**
+     * ============================================================
+     * 2️⃣ DETECTAR DOCNUM (si existe)
+     * ============================================================
+     */
 
     if (preg_match('/#(\d{6,})/', $s, $m)) {
         $out['docnum'] = $m[1];
     }
 
+
+
+    /**
+     * ============================================================
+     * 3️⃣ DETECTAR TARJA KG (EXACTO)
+     * ============================================================
+     */
+
+    $out['tarja_kg'] = detectar_peso_inteligente($s);
+
     return $out;
 }
 
-/**
- * decodificar_codigo_qr()
- *
- * Convierte el bloque numérico del QR al formato SAP (ItemCode) usando:
- *  - Eliminación del prefijo 02
- *  - Traducción 00→SC y 01→SP
- *  - Fix especial para CORDILLERA 135 GRS ("1352600000XXX")
- *  - Patrón genérico clásico 4 + (00|01) + 2 + 6
- */
-function decodificar_codigo_qr(string $codigoNumerico): string
-{
-    $codigo = preg_replace('/\D/', '', $codigoNumerico ?? '');
 
-    if ($codigo === '') {
-        return '';
-    }
-
-    // 1) QUITAR prefijo 02 si viene
-    if (str_starts_with($codigo, '02')) {
-        $codigo = substr($codigo, 2);
-    }
-    // 1.A) EXCEPCIÓN PAPEL ONDA 145 GRS BOB 96 CM CPP MOSTAZAL
-    //      QR comienza con: 1145030001009637...
-    //      Código SAP correcto: 1145SC03010096
-    if (preg_match('/^1145030001009637/', $codigo)) {
-        return '1145SC03010096';
-    }
-
-
-    // 2) EXCEPCIÓN OBLIGATORIA PARA PAPEL ONDA 110 GRS HP CORDILLERA
-    //    Catálogo SAP: 1110110000000
-    //
-    //    Todos los QR comienzan con:
-    //      021110110000000...
-    //    o sin el "02":
-    //      1110110000000...
-    if (preg_match('/^111011\d{7}/', $codigo)) {
-        return '1110110000000';
-    }
-
-    // 3) FIX ESPECIAL: PAPEL ONDA 135 GRS CORDILLERA
-    if (preg_match('/1352600000(\d{3})/', $codigo, $mm)) {
-        return '1135SC26000' . $mm[1];
-    }
-
-    // 4) PATRÓN GENÉRICO
-    if (preg_match('/(\d{4})(00|01)(\d{2})(\d{6})/', $codigo, $m)) {
-        $prefijo = $m[1];
-        $grupo  = ($m[2] === '00') ? 'SC' : 'SP';
-        return $prefijo . $grupo . $m[3] . $m[4];
-    }
-
-    // 5) DEFAULT (mostrar tal cual)
-    return $codigoNumerico;
-}
 
 
 /**
- * EXTRA: extracción de candidatos (para catálogo SAP).
+ * ===============================================================
+ * EXTRA: BUSCAR CANDIDATOS EN QR (UTIL PARA DEBUG)
+ * ===============================================================
  */
 function qr_extract_candidates(string $raw): array
 {
+
     $s = _qr_normalize($raw);
 
     $cands = [];
@@ -254,13 +279,16 @@ function qr_extract_candidates(string $raw): array
     if (strpos($s, ';') !== false) {
         foreach (explode(';', $s) as $p) {
             $p = trim($p);
+
             if ($p !== '' && strcasecmp($p, 'NULL') !== 0 && strlen($p) >= 5) {
                 $cands[] = $p;
             }
         }
     }
 
-    $cands = array_map(fn($x) => trim(str_replace([",", "\t"], "", $x)), $cands);
+    $cands = array_map(function ($x) {
+        return trim(str_replace([",", "\t"], "", $x));
+    }, $cands);
     $cands = array_values(array_unique(array_filter($cands)));
 
     return [$s, $cands];

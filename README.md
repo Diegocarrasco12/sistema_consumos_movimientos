@@ -1,79 +1,90 @@
-# 📦 Lectura de Tarjas QR
+# Sistema de Control Logístico – Faret / Innpack
 
-Este proyecto es un **prototipo PHP** diseñado para automatizar el **registro de tarjas de consumo de papel** mediante la lectura de **códigos QR**.  
-Funciona en un entorno local (por ejemplo **XAMPP** o **LAMP**) y utiliza la base de datos `lectura_tarjas`, la cual contiene las tablas `tarjas_scan`, `catalogo_materiales` y `usuarios`.
+Plataforma interna desarrollada para automatizar procesos operacionales de planta mediante el uso de códigos QR, integración con SAP Business One y registro centralizado de eventos logísticos.
 
----
+El sistema permite registrar movimientos de materiales, control de contenedores reutilizables (bins), consumo de papel de producción, almacenamiento en altillo y seguimiento de pallets.
 
-## 🧩 Estructura del proyecto
+## Objetivo
 
-- **`config/db.php`**  
-  Configura la conexión a MySQL mediante PDO. Ajuste el *host*, nombre de base de datos, usuario y contraseña según su entorno local.
+Digitalizar procesos operacionales que anteriormente se realizaban manualmente, mejorando:
 
-- **`helpers/qr_parser.php`**  
-  Contiene las funciones que extraen **lote**, **código de material** y **peso de la tarja (tarja_kg)** a partir del texto del QR.  
-  Puede ajustar las expresiones regulares según el formato real de sus códigos.
+- trazabilidad
+- control de inventario
+- registro de movimientos
+- integración con SAP
+- eficiencia operativa en planta
 
-- **`models/TarjaScan.php`**  
-  Modelo principal del sistema. Administra la inserción, actualización y consulta de registros en la tabla `tarjas_scan`, incluyendo los nuevos campos:
-  - `saldo_kg` → ingresado manualmente por el operador.  
-  - `consumo_kg` → calculado automáticamente como `tarja_kg - saldo_kg`.
+## Arquitectura tecnológica
 
-- **`models/CatalogoMateriales.php`**  
-  Permite obtener la descripción del material desde la tabla `catalogo_materiales`, según su código.
+Backend  
+PHP
 
-- **`public/index.php`**  
-  Formulario principal para el operador.  
-  Permite:
-  - Pegar el texto del QR.  
-  - Ingresar manualmente los campos `NP` y `Saldo KG`.  
-  - Calcular automáticamente `Consumo KG` antes de guardar el registro.  
+Frontend  
+HTML + Bootstrap + JavaScript
 
-- **`public/list.php`**  
-  Lista todos los registros de `tarjas_scan`.  
-  Permite:
-  - Filtrar por rango de fechas, código o lote.  
-  - Ver los campos `Consumo KG`, `Saldo KG` y `Tarja KG`.  
-  - Editar `estado` y `salida` directamente en línea.
+Lectura QR  
+jsQR
 
-- **`public/export_csv.php`**  
-  Exporta los registros filtrados a un archivo CSV con el siguiente orden de columnas:
-  ```
-  FECHA | (columna en blanco) | DESCRIPCIÓN | CÓDIGO | CONSUMO KG | NP | TARJA KG | SALDO KG | LOTE | ESTADO | SALIDA
-  ```
-  Usa `;` como separador y formato numérico con coma decimal (para compatibilidad con Excel).
+Base de datos local  
+MySQL
 
-- **`public/update_estado_salida.php`**  
-  Procesa la actualización de los campos `estado` y `salida` al guardar cambios desde el listado.
+ERP  
+SAP Business One
 
----
+Motor SAP  
+SQL Server
 
-## ⚙️ Instrucciones de uso
+Integración SAP  
+PDO SQLSRV (solo lectura)
 
-1. Coloque la carpeta `lectura_tarjas_project` en el directorio de documentos del servidor local (`htdocs` en XAMPP, o `/var/www/html` en LAMP).  
-2. Cree la base de datos `lectura_tarjas` ejecutando el archivo `lectura_tarjas.sql` incluido.  
-   Esto generará las tablas necesarias (`tarjas_scan`, `catalogo_materiales`, `usuarios`).  
-3. Ajuste las credenciales de conexión en `config/db.php`.  
-4. Acceda a la aplicación desde su navegador:
-   ```
-   http://localhost/lectura_tarjas_project/public/index.php
-   ```
-5. Pegue el texto del QR en el formulario, ingrese los valores de `NP` y `Saldo KG`.  
-   El sistema calculará automáticamente el **Consumo KG (tarja_kg - saldo_kg)** y almacenará todos los datos.
-6. Visite:
-   ```
-   http://localhost/lectura_tarjas_project/public/list.php
-   ```
-   para visualizar, filtrar o exportar los registros a CSV.
+## Subsistemas incluidos
 
----
+El sistema está compuesto por múltiples módulos operacionales:
 
-## 📄 Notas técnicas
+### Consumo de Papel
+Registro de consumo de tarjas mediante escaneo QR con integración a SAP.
 
-- La función `parse_qr()` es un modelo de ejemplo. Si los QR de su planta incluyen información diferente (por ejemplo, distinto orden o separadores), deberá ajustar las expresiones regulares en `helpers/qr_parser.php`.
-- Todos los valores decimales se exportan con formato **español (coma como separador decimal)**.
-- Se agregó el campo **`saldo_kg`** para replicar el flujo real de registro de operadores.
-- **`consumo_kg` se calcula automáticamente** antes de guardar, evitando errores manuales.
-- La interfaz visual está diseñada para ser **simple, clara y moderna**, con estilo corporativo adaptable.
-# sistema_consumos_movimientos
-# sistema_consumos_movimientos
+### Bins
+Control de movimiento de contenedores reutilizables dentro de la planta.
+
+### Lavado de Bins
+Registro de ciclos de lavado y control sanitario de bins.
+
+### Altillo
+Gestión de cajas almacenadas en altillo mediante QR.
+
+### Pallets
+Control de movimientos de pallets asociados a producción.
+
+### Generación de QR
+Generación e impresión de etiquetas QR para bins y materiales.
+
+## Documentación técnica
+
+Arquitectura del sistema  
+docs/arquitectura.md
+
+Flujo de procesos  
+docs/flujos_operacionales.md
+
+Integración con SAP  
+docs/integracion_sap.md
+
+Modelo de datos  
+docs/base_de_datos.md
+
+Manual operativo  
+docs/operaciones.md
+
+## Estado del sistema
+
+Sistema operativo en entorno productivo.
+
+Módulos activos:
+
+- Consumo de papel
+- Movimiento de bins
+- Lavado de bins
+- Altillo
+- Pallets
+- Generación de QR

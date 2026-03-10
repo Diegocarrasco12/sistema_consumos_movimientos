@@ -1,14 +1,8 @@
 <?php
 
-/**
- * list.php
- *
- * Muestra una lista de los registros de tarjas escaneadas. Permite filtrar
- * por fecha, código o lote, actualizar los campos estado y salida, y
- * exportar los resultados a CSV o XLSX.
- */
-
 declare(strict_types=1);
+header("X-Frame-Options: ALLOWALL");
+header("Content-Security-Policy: frame-ancestors *");
 
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../models/TarjaScan.php';
