@@ -52,20 +52,3 @@ Contiene los registros operacionales generados por los distintos módulos del si
 La plataforma consulta directamente la base de datos de SAP mediante conexión SQL Server utilizando PDO.
 
 La integración es de solo lectura para evitar modificaciones accidentales en SAP.
-
----
-
-### Conexiones SAP
-
-Servidor principal:
-
-192.168.1.231
-
-Base:
-
-CM2025_INNPACK
-
-Tablas utilizadas:
-
-- OIBT (lotes)
-- OITM (productos)

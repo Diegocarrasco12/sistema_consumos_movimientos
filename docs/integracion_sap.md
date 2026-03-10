@@ -1,8 +1,4 @@
-# Integración con SAP Business One
 
-El sistema se integra con SAP mediante consultas directas a la base de datos SQL Server.
-
-La integración es de solo lectura.
 
 ## Objetivo
 
