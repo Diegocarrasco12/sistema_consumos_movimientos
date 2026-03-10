@@ -3,8 +3,15 @@
 ############################
 .DS_Store
 Thumbs.db
+Desktop.ini
+
+############################
+# EDITORES
+############################
 .vscode/
 .idea/
+*.swp
+*.swo
 
 ############################
 # DEPENDENCIAS
@@ -15,37 +22,79 @@ node_modules/
 ############################
 # CONFIGURACIÓN SENSIBLE
 ############################
-config/
 .env
 .env.*
+config/
+config/*.php
+config/*.json
+config/*.ini
 
 ############################
-# ARCHIVOS GENERADOS
+# CREDENCIALES / CLAVES
+############################
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+
+############################
+# ARCHIVOS GENERADOS POR EL SISTEMA
 ############################
 uploads/
 logs/
 cache/
 tmp/
+storage/
+runtime/
 
 ############################
-# DATA LOCAL
+# DATA LOCAL / DATASETS
 ############################
+data/
 data/*.csv
 data/*.xlsx
+data/*.xls
+data/*.json
 
 ############################
 # EXPORTACIONES
 ############################
 *.csv
 *.xlsx
+*.xls
+*.ods
+
+############################
+# BACKUPS DE BASE DE DATOS
+############################
+*.sql
+*.dump
+*.db
+*.sqlite
 
 ############################
 # TEST / DEBUG
 ############################
 *.log
-*.sql
 test_*.php
+*_test.php
+debug_*.php
 /public/test_*.php
+/public/debug_*.php
+
+############################
+# ARCHIVOS TEMPORALES PHP
+############################
+*.cache
+*.tmp
+*.temp
+
+############################
+# ARCHIVOS DE SISTEMA OPERATIVO
+############################
+ehthumbs.db
+Icon?
 
 ############################
 # VERSIONES / BACKUPS
@@ -53,3 +102,22 @@ test_*.php
 *.bak
 *.old
 *.backup
+*.orig
+
+############################
+# ARCHIVOS DE DOCUMENTACIÓN INTERNA
+############################
+docs/internal/
+docs/private/
+
+############################
+# ARCHIVOS GRANDES (DATA REAL)
+############################
+*.zip
+*.tar
+*.tar.gz
+
+############################
+# HISTORIAL LOCAL
+############################
+.history/
