@@ -4,44 +4,45 @@ Plataforma interna desarrollada para automatizar procesos operacionales de plant
 
 El sistema permite registrar movimientos de materiales, control de contenedores reutilizables (bins), consumo de papel de producción, almacenamiento en altillo y seguimiento de pallets.
 
-## Objetivo
+---
+
+# Objetivo
 
 Digitalizar procesos operacionales que anteriormente se realizaban manualmente, mejorando:
 
 - trazabilidad
 - control de inventario
 - registro de movimientos
-- integración con sistemas de ERP
+- integración con sistemas ERP
 - eficiencia operativa en planta
 
-## Arquitectura tecnológica
+---
 
-Backend  
+# Arquitectura Tecnológica
+
+**Backend**  
 PHP
 
-Frontend  
+**Frontend**  
 HTML + Bootstrap + JavaScript
 
-Lectura QR  
+**Lectura de QR**  
 jsQR
 
-Base de datos local  
+**Base de datos local**  
 MySQL
 
-ERP  
+**Integración ERP**  
+Conexión de solo lectura a base de datos ERP mediante SQL Server.
 
+---
 
-SQL Server
-
-Integración ERP  
-
-
-## Subsistemas incluidos
+# Subsistemas incluidos
 
 El sistema está compuesto por múltiples módulos operacionales:
 
 ### Consumo de Papel
-Registro de consumo de tarjas mediante escaneo QR con integración a ERP
+Registro de consumo de tarjas mediante escaneo QR con integración al catálogo de productos del ERP.
 
 ### Bins
 Control de movimiento de contenedores reutilizables dentro de la planta.
@@ -58,8 +59,9 @@ Control de movimientos de pallets asociados a producción.
 ### Generación de QR
 Generación e impresión de etiquetas QR para bins y materiales.
 
+---
 
-## Estado del sistema
+# Estado del sistema
 
 Sistema operativo en entorno productivo.
 
@@ -71,3 +73,10 @@ Módulos activos:
 - Altillo
 - Pallets
 - Generación de QR
+
+---
+
+# Uso
+
+Este repositorio contiene únicamente el código base del sistema.  
+La documentación técnica interna, configuración de infraestructura y detalles operacionales no se incluyen en este repositorio por razones de seguridad.
