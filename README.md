@@ -1,4 +1,4 @@
-# Sistema de Control Logístico – Faret / Innpack
+# Sistema de Control Logístico
 
 Plataforma interna desarrollada para automatizar procesos operacionales de planta mediante el uso de códigos QR, integración con ERP y registro centralizado de eventos logísticos.
 
